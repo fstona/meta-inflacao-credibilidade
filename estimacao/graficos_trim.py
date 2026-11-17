@@ -1,0 +1,32 @@
+import pandas as pd, numpy as np, matplotlib.pyplot as plt
+q = pd.read_csv("base_trimestral.csv", index_col=0); q.index = pd.PeriodIndex(q.index, freq="Q").to_timestamp()
+ev = pd.read_csv("eventos_trim.csv"); p = pd.read_csv("parametros_trim.csv", index_col=0).squeeze()
+INK, INK2, GR, BLUE, ORG = "#0b0b0b", "#52514e", "#b9b8b2", "#2a78d6", "#eb6834"
+br = lambda x, d=2: f"{x:.{d}f}".replace(".", ",")
+def est(ax, t):
+    ax.set_title(t, fontsize=10.5, loc="left", color=INK); ax.tick_params(colors=INK2, labelsize=8.5)
+    ax.grid(axis="y", color="#e6e5e0", lw=0.8); ax.spines[["top", "right"]].set_visible(False)
+    for s in ["left", "bottom"]: ax.spines[s].set_color(GR)
+fig, axs = plt.subplots(1, 3, figsize=(15, 4.6), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
+ax = axs[0]; est(ax, "(a) Desancoragem: expectativa 36 meses − meta (p.p.)")
+ax.plot(q.index, q["gap36"], color=BLUE, lw=1.8); ax.axhline(0, color=GR, lw=0.8)
+ax = axs[1]; est(ax, "(b) Credibilidade λ (janela móvel de 16 trimestres)")
+ax.plot(q.index, q["lam"], color=BLUE, lw=1.8); ax.set_ylim(0, 1.05)
+ax = axs[2]; est(ax, "(c) Repasse da mudança da meta às expectativas")
+y = np.arange(len(ev)); ax.barh(y, ev["repasse"], color=BLUE, height=0.6); ax.set_yticks(y, ev["evento"]); ax.invert_yaxis()
+ax.axvline(1, color=INK2, lw=0.8, ls="--"); ax.set_xlim(0, 1.15); ax.grid(axis="y", visible=False); ax.grid(axis="x", color="#e6e5e0", lw=0.8)
+for yi, v in zip(y, ev["repasse"]): ax.text(v - 0.02, yi, br(v), va="center", ha="right", fontsize=8.5, color="white")
+fig.tight_layout(); fig.savefig("fig_estim_exogena.png", dpi=160); plt.close(fig)
+
+fig, axs = plt.subplots(1, 2, figsize=(12.5, 4.6))
+m = q["gapL"].notna() & q["lam"].notna()
+ax = axs[0]; est(ax, f"(a) λ x desancoragem passada: η = {br(p.eta)} (EP {br(p.se_eta)})")
+ax.scatter(q["gapL"][m], q["lam"][m], s=18, color=BLUE, alpha=0.6, edgecolor="none")
+xx = np.linspace(q["gapL"][m].min(), q["gapL"][m].max(), 10); ax.plot(xx, p.lam_bar - p.eta * xx, color=ORG, lw=2)
+ax.set_xlabel("desancoragem média de 16 trimestres, defasada 4 trimestres (p.p.)", color=INK2, fontsize=8.5); ax.set_ylabel("λ", color=INK2)
+ax = axs[1]; est(ax, "(b) λ estimado e ajustado pela equação de credibilidade")
+ax.plot(q.index, q["lam"], color=BLUE, lw=1.8, label="λ estimado (janela móvel)")
+ax.plot(q.index[m], p.lam_bar - p.eta * q["gapL"][m], color=ORG, lw=1.8,
+        label=f"ajustado: {br(p.lam_bar)} − {br(p.eta)} × desancoragem defasada")
+ax.set_ylim(0, 1.05); ax.legend(frameon=False, fontsize=8.5, loc="lower left")
+fig.tight_layout(); fig.savefig("fig_estim_endogena.png", dpi=160); plt.close(fig)

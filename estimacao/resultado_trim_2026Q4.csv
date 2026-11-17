@@ -1,0 +1,13 @@
+versao,omega,gamma,lam1,pe1,dSelic
+exógena,ω estimado,0.0,0.74,5.26,1.47
+exógena,ω estimado,0.05,0.67,5.48,1.79
+exógena,ω estimado,0.1,0.59,5.7,2.12
+exógena,ω = 0,0.0,0.74,4.89,0.92
+exógena,ω = 0,0.05,0.67,5.0,1.09
+exógena,ω = 0,0.1,0.59,5.12,1.26
+endógena,ω estimado,0.0,0.64,5.17,1.33
+endógena,ω estimado,0.05,0.4,5.62,2.01
+endógena,ω estimado,0.1,0.16,6.07,2.69
+endógena,ω = 0,0.0,0.87,4.56,0.42
+endógena,ω = 0,0.05,0.78,4.6,0.48
+endógena,ω = 0,0.1,0.69,4.64,0.54
